@@ -27,17 +27,16 @@ document.getElementById('canvas').appendChild(canvas);
 
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
 
-function drawMachine() {
-    console.debug('drawMachine');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+function drawArrow(): void {
     ctx.fillRect(251, 50, 10, 20);
     ctx.moveTo(245, 70);
     ctx.lineTo(267, 70);
     ctx.lineTo(256, 90);
     ctx.lineTo(245, 70);
     ctx.fill();
+}
 
+function drawTape(): void {
     ctx.moveTo(0, 100);
     ctx.lineTo(512, 100);
     ctx.moveTo(0, 124);
@@ -47,6 +46,14 @@ function drawMachine() {
         ctx.moveTo(x, 100);
         ctx.lineTo(x, 124);
     }
+}
+
+function drawMachine(): void {
+    console.debug('drawMachine');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawArrow();
+    drawTape();
 
     ctx.stroke();
 
@@ -74,14 +81,16 @@ document.getElementById('instruction-button').addEventListener('click', () => {
 const states: Array<State> = [];
 document.getElementById('state-button').addEventListener('click', () => {
     states.push(new State(instructionsForNextState));
-    document.getElementById('states').innerHTML = states
-            .map((state: State, index) => `<div><div>State ${index}</div><div>${state.instructions.map(instructionToDiv).join('')}</div></div>`)
+    let table = '<table class="table"><tr><th>No</th><th>Instructions</th></tr>'
+    table += states.map((state: State, index) => `<tr><td>${index}</td><td>${state.instructions.map(instructionToDiv).join('')}</td></tr>`)
             .join('');
+    table += '</table>';
+    document.getElementById('states').innerHTML = table;
     instructionsForNextState = [];
     document.getElementById('instructions').innerHTML = '';
 });
 
-function drawTape(tape: Tape): void {
+function drawWord(tape: Tape): void {
     const currentIndex: number = tape.currentIndex;
     for (let i=0; i<tape.word.length; i++) {
         ctx.fillText(tape.word[i], 252 + (i*FIELD_WIDTH) - (currentIndex*FIELD_WIDTH), 117);
@@ -92,7 +101,7 @@ turingMachine.observeState()
     .subscribe((tape: Tape) => {
         console.debug('received tape', tape);
         drawMachine();
-        drawTape(tape);
+        drawWord(tape);
     });
 
 document.getElementById('run-button').addEventListener('click', () => {

@@ -8,11 +8,13 @@ export default class TuringMachine {
 
     private _tape: Tape;
     private _stateManager: StateManager;
+    private _stepDelay: number;
     private _tapeSubject: Subject<Tape> = new Subject();
 
-    constructor(tape: Tape, stateManager: StateManager) {
+    constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 1000) {
         this._tape = tape;
         this._stateManager = stateManager;
+        this._stepDelay = stepDelay;
     }
 
     public loadProgram(states: State[]): void {
@@ -33,15 +35,16 @@ export default class TuringMachine {
     }
 
     public run(): void {
-        let run: boolean = true;
-        while(run) {
+        const interval = setInterval(() => {
             const currentSymbol: string = this._tape.current;
             const result: ExecutionResult = this._stateManager.execute(currentSymbol);
             this._tape.writeSymbol(result.symbol);
             this._tape.move(result.direction);
-            run = !result.finished;
             this._tapeSubject.next(this._tape);
-        }
+            if (result.finished) {
+                clearInterval(interval);
+            }
+        }, this._stepDelay);
     }
 
     public reset(): void {

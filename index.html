@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+        <title>Turing Machine</title>
+    </head>
+    <body>
+        <div class="tile is-ancestor is-vertical">
+            <div class="tile is-parent">
+                <div class="tile is-parent">
+                    <div class="tile is-child box">
+                        <div class="field">
+                            <label for="word" class="label">Word</label>
+                            <div class="control">
+                                <input id="word" type="text" name="word" required="required" class="input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-child box">
+                        <div id="states">
+                        </div>
+                        <h3 class="title is-3">New state</h3>
+                        <div id="instructions">
+                        </div>
+                        <h4 class="title is-4">New instruction</h4>
+                        if input equals <input id="input-new" type="text" name="input-new" required="required" class="input" />
+                        then output should be <input id="output-new" type="text" name="output-new" required="required" class="input" />
+                        the tape should move to the
+                        <div class="select">
+                            <select id="direction-new">
+                                <option>Left</option>
+                                <option>Right</option>
+                            </select>
+                        </div>
+                        and the next state should be <input id="next-state-new" type="text" name="next-state-new" required="required" class="input" />
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <input id="instruction-button" type="submit" value="Add instruction" class="button" />
+                            </div>
+                        </div>
+                        <input id="state-button" type="submit" value="Add state" class="button" />
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <input id="run-button" type="submit" value="Run" class="button is-link" />
+                            </div>
+                            <div class="control">
+                                <input id="clear-button" type="submit" value="Clear" class="button" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tile is-parent">
+                <div class="tile is-parent">
+                    <div id="canvas" class="tile is-child box" />
+                </div>
+            </div>
+        </div>
+    <script type="text/javascript" src="bundle.js"></script></body>
+</html>

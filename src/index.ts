@@ -1,3 +1,4 @@
+import { delay } from 'rxjs/operators';
 import Instruction from './instruction';
 import State from './state';
 import StateManager from './state-manager';
@@ -30,6 +31,7 @@ document.getElementById('canvas').appendChild(canvas);
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
 
 function drawMachine() {
+    console.debug('drawMachine');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.moveTo(0, 100);
@@ -82,11 +84,13 @@ function drawTape(tape: Tape): void {
     }
 }
 
-turingMachine.observeState().subscribe((tape: Tape) => {
-    console.debug('received tape', tape);
-    drawMachine();
-    drawTape(tape);
-});
+turingMachine.observeState()
+    .pipe(delay(2000))
+    .subscribe((tape: Tape) => {
+        console.debug('received tape', tape);
+        drawMachine();
+        drawTape(tape);
+    });
 
 document.getElementById('run-button').addEventListener('click', () => {
     const wordField: HTMLFormElement = document.getElementById('word') as HTMLFormElement;

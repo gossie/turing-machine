@@ -1,4 +1,3 @@
-import { delay } from 'rxjs/operators';
 import Instruction from './instruction';
 import State from './state';
 import StateManager from './state-manager';
@@ -24,8 +23,6 @@ canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
     'image-rendering: pixelated; ' + // Future browsers
     '-ms-interpolation-mode: nearest-neighbor;'; // IE
 
-// canvas.style.width = `${256 * 2}px`;
-// canvas.style.height = `${224 * 2}px`;
 document.getElementById('canvas').appendChild(canvas);
 
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
@@ -33,6 +30,13 @@ const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
 function drawMachine() {
     console.debug('drawMachine');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillRect(251, 50, 10, 20);
+    ctx.moveTo(245, 70);
+    ctx.lineTo(267, 70);
+    ctx.lineTo(256, 90);
+    ctx.lineTo(245, 70);
+    ctx.fill();
 
     ctx.moveTo(0, 100);
     ctx.lineTo(512, 100);
@@ -85,7 +89,6 @@ function drawTape(tape: Tape): void {
 }
 
 turingMachine.observeState()
-    .pipe(delay(2000))
     .subscribe((tape: Tape) => {
         console.debug('received tape', tape);
         drawMachine();

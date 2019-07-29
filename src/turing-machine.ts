@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { interval, Observable, Subject, Subscription } from 'rxjs';
 import ExecutionResult from './execution-result';
 import Tape from './tape';
 import State from './state';
@@ -10,7 +10,7 @@ export default class TuringMachine {
     private _stateManager: StateManager;
     private _stepDelay: number;
     private _tapeSubject: Subject<Tape> = new Subject();
-    private _interval: number;
+    private _subscription: Subscription;
 
     constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 1000) {
         this._tape = tape;
@@ -36,22 +36,35 @@ export default class TuringMachine {
     }
 
     public run(): void {
-        this._interval = setInterval(() => {
-            const currentSymbol: string = this._tape.current;
-            const result: ExecutionResult = this._stateManager.execute(currentSymbol);
-            this._tape.writeSymbol(result.symbol);
-            this._tape.move(result.direction);
-            this._tapeSubject.next(this._tape);
-            if (result.finished) {
-                clearInterval(this._interval);
-            }
-        }, this._stepDelay);
+        this._subscription = interval(this._stepDelay)
+            .subscribe(
+                () => this.performStep(),
+                (error: Error) => this.handleError(error)
+            );
+    }
+
+    private performStep(): void {
+        const currentSymbol: string = this._tape.current;
+        const result: ExecutionResult = this._stateManager.execute(currentSymbol);
+        this._tape.writeSymbol(result.symbol);
+        this._tape.move(result.direction);
+        this._tapeSubject.next(this._tape);
+        if (result.finished) {
+            this._subscription.unsubscribe();
+        }
+    }
+
+    private handleError(error: Error): void {
+        this._subscription.unsubscribe();
+        console.error('error', error);
     }
 
     public reset(): void {
         this._tape.reset();
         this._stateManager.reset();
-        clearInterval(this._interval);
+        if (this._subscription) {
+            this._subscription.unsubscribe();
+        }
     }
 
 }

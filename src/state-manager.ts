@@ -20,7 +20,12 @@ export default class StateManager {
 
         if (instruction) {
             this._index = instruction.successor;
+            // if (this._index < 0 || this._index >= this._states.length) {
+            //     throw new Error(`No state found for index ${this._index}`);
+            // }
             result = new ExecutionResult(instruction.postcondition, instruction.direction, this._states[this._index].instructions.length == 0);
+        } else {
+            // throw new Error(`No instruction found for symbol ${symbol}`);
         }
 
         return result;

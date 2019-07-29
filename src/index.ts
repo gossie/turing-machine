@@ -50,7 +50,6 @@ function drawTape(): void {
 }
 
 function drawMachine(): void {
-    console.debug('drawMachine');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawArrow();
@@ -73,7 +72,6 @@ document.getElementById('instruction-button').addEventListener('click', () => {
     const direction: HTMLFormElement = document.getElementById('direction-new') as HTMLFormElement;
     const nextState: HTMLFormElement = document.getElementById('next-state-new') as HTMLFormElement;
     instructionsForNextState.push(new Instruction(inputSymbol.value, outputSymbol.value, direction.value, parseInt(nextState.value)));
-    console.debug('instructions', instructionsForNextState);
     document.getElementById('instructions').innerHTML = instructionsForNextState
             .map(instructionToDiv)
             .join('');
@@ -110,14 +108,9 @@ document.getElementById('run-button').addEventListener('click', () => {
     turingMachine.reset();
     turingMachine.loadWord(wordField.value);
     turingMachine.loadProgram(states);
-
-    try {
-        turingMachine.run();
-    } catch(e) {
-        console.error(e);
-    }
+    turingMachine.run();
 });
 
-window.addEventListener('unload', function(event) {
+window.addEventListener('unload', () => {
     subscription.unsubscribe();
 });

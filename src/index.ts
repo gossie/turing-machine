@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import Instruction from './instruction';
 import State from './state';
 import StateManager from './state-manager';
@@ -97,7 +98,7 @@ function drawWord(tape: Tape): void {
     }
 }
 
-turingMachine.observeState()
+const subscription: Subscription = turingMachine.observeState()
     .subscribe((tape: Tape) => {
         console.debug('received tape', tape);
         drawMachine();
@@ -115,4 +116,8 @@ document.getElementById('run-button').addEventListener('click', () => {
     } catch(e) {
         console.error(e);
     }
+});
+
+window.addEventListener('unload', function(event) {
+    subscription.unsubscribe();
 });

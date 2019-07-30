@@ -77,7 +77,7 @@ document.getElementById('instruction-button').addEventListener('click', () => {
             .join('');
 });
 
-const states: Array<State> = [];
+let states: Array<State> = [];
 document.getElementById('state-button').addEventListener('click', () => {
     states.push(new State(instructionsForNextState));
     let table = '<table class="table"><tr><th>No</th><th>Instructions</th></tr>'
@@ -109,6 +109,13 @@ document.getElementById('run-button').addEventListener('click', () => {
     turingMachine.loadWord(wordField.value);
     turingMachine.loadProgram(states);
     turingMachine.run();
+});
+
+document.getElementById('clear-button').addEventListener('click', () => {
+    document.getElementById('instructions').innerHTML = '';
+    instructionsForNextState = [];
+    document.getElementById('states').innerHTML = '';
+    states = [];
 });
 
 window.addEventListener('unload', () => {

@@ -7,6 +7,11 @@
         <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
         <title>Turing Machine</title>
+        <style>
+            .symbol-input {
+                width: 50px;
+            }
+        </style>
     </head>
     <body>
         <div class="tile is-ancestor is-vertical">
@@ -25,8 +30,8 @@
                         <div id="instructions">
                         </div>
                         <h4 class="title is-4">New instruction</h4>
-                        if input equals <input id="input-new" type="text" name="input-new" required="required" class="input is-small" />
-                        then output should be <input id="output-new" type="text" name="output-new" required="required" class="input is-small" />
+                        if input equals <input id="input-new" type="text" name="input-new" required="required" class="input is-small symbol-input" />
+                        then output should be <input id="output-new" type="text" name="output-new" required="required" class="input is-small symbol-input" />
                         the tape should move to the
                         <div class="select is-small">
                             <select id="direction-new">
@@ -34,19 +39,21 @@
                                 <option>Right</option>
                             </select>
                         </div>
-                        and the next state should be <input id="next-state-new" type="text" name="next-state-new" required="required" class="input" />
+                        and the next state should be <input id="next-state-new" type="text" name="next-state-new" required="required" class="input is-small symbol-input" />
                         <div class="field is-grouped">
                             <div class="control">
-                                <input id="instruction-button" type="submit" value="Add instruction" class="button" />
+                                <a id="instruction-button" class="button is-text">Add instruction</a>
+                            </div>
+                            <div class="control">
+                                <button id="state-button" class="button is-text">Add state</a>
                             </div>
                         </div>
-                        <input id="state-button" type="submit" value="Add state" class="button" />
                         <div class="field is-grouped">
                             <div class="control">
-                                <input id="run-button" type="submit" value="Run" class="button is-link" />
+                                <a id="run-button" class="button is-link">Run</a>
                             </div>
                             <div class="control">
-                                <input id="clear-button" type="submit" value="Clear" class="button" />
+                                <a id="clear-button" class="button">Clear</a>
                             </div>
                         </div>
                     </div>

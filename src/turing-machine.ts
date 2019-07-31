@@ -9,7 +9,7 @@ export default class TuringMachine {
     private _tape: Tape;
     private _stateManager: StateManager;
     private _stepDelay: number;
-    private _tapeSubject: Subject<Tape> = new Subject();
+    private _tapeSubject: Subject<[Tape, State]> = new Subject();
     private _subscription: Subscription;
 
     constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 1000) {
@@ -28,10 +28,10 @@ export default class TuringMachine {
             wordArray.push(word.charAt(i));
         }
         this._tape.word = wordArray;
-        this._tapeSubject.next(this._tape);
+        this._tapeSubject.next([this._tape, this._stateManager.currentState]);
     }
 
-    public observeState(): Observable<Tape> {
+    public observeState(): Observable<[Tape, State]> {
         return this._tapeSubject.asObservable();
     }
 
@@ -48,7 +48,7 @@ export default class TuringMachine {
         const result: ExecutionResult = this._stateManager.execute(currentSymbol);
         this._tape.writeSymbol(result.symbol);
         this._tape.move(result.direction);
-        this._tapeSubject.next(this._tape);
+        this._tapeSubject.next([this._tape, this._stateManager.currentState]);
         if (result.finished) {
             this._subscription.unsubscribe();
         }

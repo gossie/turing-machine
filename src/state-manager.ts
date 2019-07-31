@@ -7,6 +7,10 @@ export default class StateManager {
     private _index: number = 0;
     private _states: Array<State> = [];
 
+    public get currentState(): State {
+        return this._states[this._index];
+    }
+
     public addState(state: State): void {
         this._states.push(state);
     }

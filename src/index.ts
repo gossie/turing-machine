@@ -1,5 +1,4 @@
 import { Subscription } from 'rxjs';
-import Instruction from './instruction';
 import State from './state';
 import StateManager from './state-manager';
 import Tape from './tape';
@@ -8,6 +7,7 @@ import TuringMachine from './turing-machine';
 const stateManager = new StateManager();
 const tape: Tape = new Tape();
 const turingMachine: TuringMachine = new TuringMachine(tape, stateManager);
+window['turingMachine'] = turingMachine;
 
 const FIELD_WIDTH: number = 32;
 
@@ -61,34 +61,6 @@ function drawMachine(): void {
 }
 drawMachine();
 
-function instructionToDiv(instruction: Instruction): string {
-    return `<div>if input equals ${instruction.precondition} then output = ${instruction.postcondition}; direction = ${instruction.direction}; nextState = ${instruction.successor} </div>`;
-}
-
-let instructionsForNextState = [];
-document.getElementById('instruction-button').addEventListener('click', () => {
-    const inputSymbol: HTMLFormElement = document.getElementById('input-new') as HTMLFormElement;
-    const outputSymbol: HTMLFormElement = document.getElementById('output-new') as HTMLFormElement;
-    const direction: HTMLFormElement = document.getElementById('direction-new') as HTMLFormElement;
-    const nextState: HTMLFormElement = document.getElementById('next-state-new') as HTMLFormElement;
-    instructionsForNextState.push(new Instruction(inputSymbol.value, outputSymbol.value, direction.value, parseInt(nextState.value)));
-    document.getElementById('instructions').innerHTML = instructionsForNextState
-            .map(instructionToDiv)
-            .join('');
-});
-
-let states: Array<State> = [];
-document.getElementById('state-button').addEventListener('click', () => {
-    states.push(new State(instructionsForNextState));
-    let table = '<table class="table"><tr><th>No</th><th>Instructions</th></tr>'
-    table += states.map((state: State, index) => `<tr><td>${index}</td><td>${state.instructions.map(instructionToDiv).join('')}</td></tr>`)
-            .join('');
-    table += '</table>';
-    document.getElementById('states').innerHTML = table;
-    instructionsForNextState = [];
-    document.getElementById('instructions').innerHTML = '';
-});
-
 function drawWord(tape: Tape): void {
     const currentIndex: number = tape.currentIndex;
     for (let i=0; i<tape.word.length; i++) {
@@ -97,26 +69,11 @@ function drawWord(tape: Tape): void {
 }
 
 const subscription: Subscription = turingMachine.observeState()
-    .subscribe((tape: Tape) => {
+    .subscribe((data: [Tape, State]) => {
         console.debug('received tape', tape);
         drawMachine();
-        drawWord(tape);
+        drawWord(data[0]);
     });
-
-document.getElementById('run-button').addEventListener('click', () => {
-    const wordField: HTMLFormElement = document.getElementById('word') as HTMLFormElement;
-    turingMachine.reset();
-    turingMachine.loadWord(wordField.value);
-    turingMachine.loadProgram(states);
-    turingMachine.run();
-});
-
-document.getElementById('clear-button').addEventListener('click', () => {
-    document.getElementById('instructions').innerHTML = '';
-    instructionsForNextState = [];
-    document.getElementById('states').innerHTML = '';
-    states = [];
-});
 
 window.addEventListener('unload', () => {
     subscription.unsubscribe();

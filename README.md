@@ -12,4 +12,5 @@ The Turing Machine applies to the following rules:
 * Empty fields on the tape are represented with an '_'.
 * The program is finished when the final state is reached.
 A state with no instructions is the final state.
+
 Try out this [implementation](https://gossie.github.io/turing-machine/).

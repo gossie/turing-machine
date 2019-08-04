@@ -18,7 +18,8 @@
                         instructions: [],
                         states: [],
                         selectedStateIndex: -1,
-                        subscription: null
+                        subscription: null,
+                        infoIsActive: false
                     },
                     methods: {
                         addInstruction: function() {
@@ -59,6 +60,9 @@
                         },
                         removeInstruction: function(index) {
                             this.instructions.splice(index, 1);
+                        },
+                        toggleInfo: function() {
+                            this.infoIsActive = !this.infoIsActive;
                         }
                     }
                 });
@@ -73,6 +77,10 @@
             .symbol-input {
                 width: 50px;
             }
+
+            .clickable {
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -80,6 +88,39 @@
             <div class="tile is-parent">
                 <div class="tile is-parent">
                     <div id="app" class="tile is-child box">
+                        <div class="modal" v-bind:class="{ 'is-active': infoIsActive }">
+                            <div class="modal-background"></div>
+                            <div class="modal-content">
+                                <div class="content box">
+                                    <ul>
+                                        <li>
+                                            You can define states that describe the program.
+                                        </li>
+                                        <li>
+                                            A state consists of a Instructions.
+                                        </li>
+                                        <li>
+                                            In each state the current letter is read from the tape and the instruction to be executed is identified. The output is written back to the tape, the cursor is moved in the direction and the next state is executed.
+                                        </li>
+                                        <li>
+                                            Empty fields on the tape  are represented with an '_'.
+                                        </li>
+                                        <li>
+                                            The program is finished when the final state is reached.
+                                        </li>
+                                        <li>
+                                            A state with no instructions is the final state.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="modal-close is-large" aria-label="close" @click="toggleInfo"></button>
+                        </div>
+                        <div class="field">
+                            <span class="icon clickable" @click="toggleInfo">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                        </div>
                         <div class="field is-grouped">
                             <div class="control">
                                 <a id="run-button" class="button is-link" @click="run">Run</a>
@@ -95,8 +136,8 @@
                             </div>
                         </div>
                         <div class="box">
-                            if input equals <input id="input-new" type="text" name="input-new" required="required" class="input is-small symbol-input" v-model="input" />
-                            then output should be <input id="output-new" type="text" name="output-new" required="required" class="input is-small symbol-input" v-model="output" />
+                            if input equals <input id="input-new" type="text" name="input-new" required="required" class="input is-small symbol-input" v-model="input" /><br />
+                            then output should be <input id="output-new" type="text" name="output-new" required="required" class="input is-small symbol-input" v-model="output" /><br />
                             the tape should move to the
                             <div class="select is-small">
                                 <select id="direction-new" v-model="direction">
@@ -104,13 +145,14 @@
                                     <option>Right</option>
                                 </select>
                             </div>
+                            <br />
                             and the next state should be <input id="next-state-new" type="text" name="next-state-new" required="required" class="input is-small symbol-input" v-model="next" />
                             <div class="field is-grouped">
                                 <div class="control">
-                                    <a id="instruction-button" class="button is-text" @click="addInstruction">Add instruction</a>
+                                    <button id="instruction-button" class="button is-text" @click="addInstruction">Add instruction</button>
                                 </div>
                                 <div class="control">
-                                    <button id="state-button" class="button is-text" @click="addState">Add state</a>
+                                    <button id="state-button" class="button is-text" @click="addState">Add state</button>
                                 </div>
                             </div>
                         </div>
@@ -122,7 +164,7 @@
                         </div>
                         <div class="box">
                             <h4 class="title is-4">States</h4>
-                            <table class="table is-striped">
+                            <table class="table is-striped is-fullwidth">
                                 <tr>
                                     <th>Index</th>
                                     <th>Instructions</th>
@@ -132,7 +174,8 @@
                                     <td>{{ index }}</td>
                                     <td>
                                         <div v-for="instruction in state.instructions">
-                                            if input equals {{ instruction.precondition }} then return {{ instruction.postcondition }} and move {{ instruction.direction }}; Next state is {{ instruction.successor }}
+                                            if input equals <b>{{ instruction.precondition }}</b> then return <b>{{ instruction.postcondition }}</b> and move <b>{{ instruction.direction }}</b>;<br />
+                                            Next state is <b>{{ instruction.successor }}</b>
                                         </div>
                                     </td>
                                     <td>
@@ -142,10 +185,10 @@
                             </table>
                         </div>
                     </div>
-                    <div class="tile is-parent">
-                        <div class="tile is-child box">
-                            <div id="canvas" class="tile is-child box" />
-                        </div>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-child box">
+                        <div id="canvas" class="tile is-child box"></div>
                     </div>
                 </div>
             </div>

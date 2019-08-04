@@ -2,7 +2,8 @@
 
 # Turing Machine
 
-Want to try it out without further reading? [https://gossie.github.io/turing-machine]((https://gossie.github.io/turing-machine/))
+Want to try it out without further reading? [https://gossie.github.io/turing-machine](https://gossie.github.io/turing-machine/)
+
 To find out how a Turing machine works in general: [https://en.wikipedia.org/wiki/Turing_machine](https://en.wikipedia.org/wiki/Turing_machine)
 This Turing Machine is implemented in [TypeScript](https://www.typescriptlang.org/) using a canvas for the rendering and a small [Vue](https://vuejs.org/) for the configuration.
 The Turing Machine applies to the following rules:

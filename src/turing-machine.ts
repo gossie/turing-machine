@@ -1,4 +1,7 @@
 import { interval, Observable, Subject, Subscription } from 'rxjs';
+import { delay, map, tap } from 'rxjs/operators';
+import { EventType } from './event-type';
+import Event from './event';
 import ExecutionResult from './execution-result';
 import Tape from './tape';
 import State from './state';
@@ -9,10 +12,10 @@ export default class TuringMachine {
     private _tape: Tape;
     private _stateManager: StateManager;
     private _stepDelay: number;
-    private _tapeSubject: Subject<[Tape, State]> = new Subject();
+    private _tapeSubject: Subject<Event> = new Subject();
     private _subscription: Subscription;
 
-    constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 1000) {
+    constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 500) {
         this._tape = tape;
         this._stateManager = stateManager;
         this._stepDelay = stepDelay;
@@ -28,28 +31,67 @@ export default class TuringMachine {
             wordArray.push(word.charAt(i));
         }
         this._tape.word = wordArray;
-        this._tapeSubject.next([this._tape, this._stateManager.currentState]);
+        this._tapeSubject.next(new Event(EventType.TAPE_MOVE, {
+            state: this._stateManager.currentState,
+            tape: this._tape
+        }));
     }
 
-    public observeState(): Observable<[Tape, State]> {
+    public observeState(): Observable<Event> {
         return this._tapeSubject.asObservable();
     }
 
     public run(): void {
-        this._subscription = interval(this._stepDelay)
+        this._subscription = interval(this._stepDelay * 5)
+            .pipe(
+                tap(() => this.readSymbol()),
+                delay(this._stepDelay),
+                map(() => this.execute()),
+                delay(this._stepDelay),
+                tap((executionResult: ExecutionResult) => this.writeSymbol(executionResult)),
+                delay(this._stepDelay),
+                tap((executionResult: ExecutionResult) => this.move(executionResult)),
+                delay(this._stepDelay),
+            )
             .subscribe(
-                () => this.performStep(),
+                (executionResult: ExecutionResult) => this.performStep(executionResult),
                 (error: Error) => this.handleError(error)
             );
     }
 
-    private performStep(): void {
-        const currentSymbol: string = this._tape.current;
-        const result: ExecutionResult = this._stateManager.execute(currentSymbol);
-        this._tape.writeSymbol(result.symbol);
-        this._tape.move(result.direction);
-        this._tapeSubject.next([this._tape, this._stateManager.currentState]);
-        if (result.finished) {
+    private readSymbol(): void {;
+        this._tapeSubject.next(new Event(EventType.SYMBOL_READ, {
+            symbol: this._tape.current
+        }));
+    }
+
+    private execute(): ExecutionResult {
+        const executionResult: ExecutionResult = this._stateManager.execute(this._tape.current);
+        this._tapeSubject.next(new Event(EventType.SYMBOL_READ, {
+            symbol: executionResult.symbol
+        }));
+        return executionResult;
+    }
+
+    private writeSymbol(executionResult: ExecutionResult): void {;
+        this._tape.writeSymbol(executionResult.symbol);
+        this._tapeSubject.next(new Event(EventType.SYMBOL_WRITE, {
+            state: this._stateManager.currentState,
+            tape: this._tape
+        }));
+    }
+
+    private move(executionResult: ExecutionResult): ExecutionResult {
+        this._tape.move(executionResult.direction);
+        this._tapeSubject.next(new Event(EventType.TAPE_MOVE, {
+            state: this._stateManager.currentState,
+            tape: this._tape
+        }));
+        return executionResult;
+    }
+
+    private performStep(executionResult: ExecutionResult): void {
+        if (executionResult.finished) {
             this._subscription.unsubscribe();
         }
     }

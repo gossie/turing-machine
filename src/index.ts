@@ -1,5 +1,6 @@
 import { Subscription } from 'rxjs';
-import State from './state';
+import Event from './event';
+import { EventType } from './event-type';
 import StateManager from './state-manager';
 import Tape from './tape';
 import TuringMachine from './turing-machine';
@@ -28,6 +29,18 @@ document.getElementById('canvas').appendChild(canvas);
 
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
 
+function drawSymbolBox(): void {
+    const x = 240;
+    ctx.clearRect(x, 16, FIELD_WIDTH, 24);
+    ctx.strokeRect(x, 16, FIELD_WIDTH, 24);
+}
+
+function drawSymbolInBox(symbol: string): void {
+    ctx.clearRect(240, 16, FIELD_WIDTH, 24);
+    ctx.font = "17px Arial";
+    ctx.fillText(symbol, 251, 33);
+}
+
 function drawArrow(): void {
     ctx.fillRect(251, 50, 10, 20);
     ctx.moveTo(245, 70);
@@ -47,15 +60,15 @@ function drawTape(): void {
         ctx.moveTo(x, 100);
         ctx.lineTo(x, 124);
     }
+    ctx.stroke();
 }
 
 function drawMachine(): void {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    drawSymbolBox();
     drawArrow();
     drawTape();
-
-    ctx.stroke();
 
     ctx.font = "17px Arial";
 }
@@ -69,10 +82,13 @@ function drawWord(tape: Tape): void {
 }
 
 const subscription: Subscription = turingMachine.observeState()
-    .subscribe((data: [Tape, State]) => {
-        console.debug('received tape', tape);
-        drawMachine();
-        drawWord(data[0]);
+    .subscribe((event: Event) => {
+        if (event.type === EventType.TAPE_MOVE || event.type === EventType.SYMBOL_WRITE) {
+            drawMachine();
+            drawWord(event.payload['tape']);
+        } else if (event.type === EventType.SYMBOL_READ) {
+            drawSymbolInBox(event.payload['symbol']);
+        }
     });
 
 window.addEventListener('unload', () => {

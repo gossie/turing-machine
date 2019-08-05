@@ -36,7 +36,8 @@ function drawSymbolBox(): void {
 }
 
 function drawSymbolInBox(symbol: string): void {
-    ctx.clearRect(240, 16, FIELD_WIDTH, 24);
+    ctx.clearRect(241, 101, 30, 22);
+    ctx.clearRect(241, 17, 30, 22);
     ctx.font = "17px Arial";
     ctx.fillText(symbol, 251, 33);
 }

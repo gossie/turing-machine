@@ -44,7 +44,11 @@
                             }
 
                             this.subscription = turingMachine.observeState()
-                                .subscribe((data) => this.selectedStateIndex = this.states.indexOf(data[1]));
+                                .subscribe(event => {
+                                    if (event.type === 2) {
+                                        this.selectedStateIndex = this.states.indexOf(event.payload.state);
+                                    }
+                                });
 
                             turingMachine.reset();
                             turingMachine.loadWord(this.word);

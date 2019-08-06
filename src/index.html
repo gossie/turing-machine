@@ -54,6 +54,7 @@
                             turingMachine.loadWord(this.word);
                             turingMachine.loadProgram(this.states);
                             turingMachine.run();
+                            this.selectedStateIndex = 0;
                         },
                         clear: function() {
                             this.states = [];

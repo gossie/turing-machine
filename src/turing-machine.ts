@@ -15,7 +15,7 @@ export default class TuringMachine {
     private _tapeSubject: Subject<Event> = new Subject();
     private _subscription: Subscription;
 
-    constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 500) {
+    constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 250) {
         this._tape = tape;
         this._stateManager = stateManager;
         this._stepDelay = stepDelay;

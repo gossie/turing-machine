@@ -92,6 +92,7 @@ export default class TuringMachine {
 
     private performStep(executionResult: ExecutionResult): void {
         if (executionResult.finished) {
+            this._tapeSubject.next(new Event(EventType.FINISHED, {}));
             this._subscription.unsubscribe();
         }
     }

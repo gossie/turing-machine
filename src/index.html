@@ -37,7 +37,7 @@
                                 instructions: this.instructions
                             });
                             this.instructions = [];
-                            this.raw = JSON.stringify(this.states);
+                            this.raw = JSON.stringify(this.states, undefined, 2);
                         },
                         run: function() {
                             const turingMachine = window['turingMachine'];

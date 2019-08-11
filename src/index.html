@@ -21,7 +21,8 @@
                         subscription: null,
                         infoIsActive: false,
                         selectedTab: 0,
-                        raw: ''
+                        raw: '',
+                        navbarExpanded: false
                     },
                     methods: {
                         addInstruction: function() {
@@ -88,8 +89,11 @@
                             }
                             this.states = JSON.parse(this.raw);
                             this.instructions = [];
+                            this.navbarExpanded = false;
+                        },
+                        toggleNavbar: function() {
+                            this.navbarExpanded = !this.navbarExpanded;
                         }
-
                     }
                 });
             });
@@ -117,7 +121,14 @@
         <div id="app">
             <section class="section">
                 <nav class="navbar" role="navigation" aria-label="main navigation">
-                    <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-brand">
+                        <a @click="toggleNavbar" role="button" class="navbar-burger burger" v-bind:class="{ 'is-active': navbarExpanded }" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <div id="navbarBasicExample" class="navbar-menu" v-bind:class="{ 'is-active': navbarExpanded }">
                         <div class="navbar-start">
                             <div class="navbar-item has-dropdown is-hoverable">
                                 <a class="navbar-link">

@@ -86,6 +86,9 @@
                             } else if(program === 'toUpperCase') {
                                 this.raw = '[{"instructions": [{"precondition": "a","postcondition": "A","direction": "Right","successor": 0},{"precondition": "b","postcondition": "B","direction": "Right","successor": 0},{"precondition": "_","postcondition": "_","direction": "Left","successor": "1"}]},{"instructions": []}]';
                                 this.word = 'abba';
+                            } else if(program === 'invert') {
+                                this.raw = '[{"instructions":[{"precondition":"a","postcondition":"b","direction":"Right","successor":0},{"precondition":"b","postcondition":"a","direction":"Right","successor":0},{"precondition":"_","postcondition":"_","direction":"Left","successor":"1"}]},{"instructions":[{"precondition":"a","postcondition":"b","direction":"Left","successor":"1"},{"precondition":"b","postcondition":"a","direction":"Left","successor":"1"},{"precondition":"_","postcondition":"_","direction":"Right","successor":"0"}]}]';
+                                this.word = 'abba';
                             }
                             this.states = JSON.parse(this.raw);
                             this.instructions = [];
@@ -141,6 +144,9 @@
                                     </a>
                                     <a class="navbar-item" @click="loadProgram('toUpperCase')">
                                         To upper case
+                                    </a>
+                                    <a class="navbar-item" @click="loadProgram('invert')">
+                                        Inverter
                                     </a>
                                 </div>
                             </div>

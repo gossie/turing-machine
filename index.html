@@ -199,6 +199,9 @@
                                                 if input equals <b>{{ instruction.precondition }}</b> then return <b>{{ instruction.postcondition }}</b> and move <b>{{ instruction.direction }}</b>;<br />
                                                 Next state is <b>{{ instruction.successor }}</b>
                                             </div>
+                                            <div v-if="state.instructions.length === 0">
+                                                Final State
+                                            </div>
                                         </td>
                                         <td>
                                             <a class="delete" @click="removeState(index)"></a>

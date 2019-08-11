@@ -77,7 +77,19 @@
                         },
                         rawChanged: function() {
                             this.states = JSON.parse(this.raw);
+                        },
+                        loadProgram: function(program) {
+                            if (program === 'sort') {
+                                this.raw = '[{"instructions":[{"precondition":"a","postcondition":"a","direction":"Right","successor":0},{"precondition":"b","postcondition":"b","direction":"Right","successor":"1"}]},{"instructions":[{"precondition":"b","postcondition":"b","direction":"Right","successor":"1"},{"precondition":"a","postcondition":"*","direction":"Left","successor":"2"},{"precondition":"_","postcondition":"_","direction":"Left","successor":10}]},{"instructions":[{"precondition":"b","postcondition":"b","direction":"Left","successor":"2"},{"precondition":"a","postcondition":"a","direction":"Left","successor":"2"},{"precondition":"_","postcondition":"a","direction":"Right","successor":"3"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Right","successor":"3"},{"precondition":"b","postcondition":"b","direction":"Right","successor":"3"},{"precondition":"*","postcondition":"*","direction":"Right","successor":"4"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"5"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"6"},{"precondition":"_","postcondition":"_","direction":"Left","successor":"7"}]},{"instructions":[{"precondition":"*","postcondition":"a","direction":"Right","successor":"8"}]},{"instructions":[{"precondition":"*","postcondition":"b","direction":"Right","successor":"8"}]},{"instructions":[{"precondition":"*","postcondition":"_","direction":"Left","successor":"9"}]},{"instructions":[{"precondition":"a","postcondition":"*","direction":"Right","successor":"4"},{"precondition":"b","postcondition":"*","direction":"Right","successor":"4"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"9"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"9"},{"precondition":"_","postcondition":"_","direction":"Right","successor":"0"}]},{"instructions":[]}]';
+                                this.word = 'ababbabbaa';
+                            } else if(program === 'toUpperCase') {
+                                this.raw = '[{"instructions": [{"precondition": "a","postcondition": "A","direction": "Right","successor": 0},{"precondition": "b","postcondition": "B","direction": "Right","successor": 0},{"precondition": "_","postcondition": "_","direction": "Left","successor": "1"}]},{"instructions": []}]';
+                                this.word = 'abba';
+                            }
+                            this.states = JSON.parse(this.raw);
+                            this.instructions = [];
                         }
+
                     }
                 });
             });
@@ -102,134 +114,161 @@
         </style>
     </head>
     <body>
-        <section class="section">
-            <nav class="level">
-                <div class="level-left"></div>
-                <div class="level-right">
-                    <div class="level-item">
-                        View the code on&nbsp;<a href="https://github.com/gossie/turing-machine" target="_blank">Github</a><span class="icon"><i class="fab fa-github"></i></span>
-                    </div>
-                </div>
-            </nav>
-        </section>
-        <section class="section">
-            <div class="tile is-ancestor is-vertical">
-                <div class="tile is-parent">
-                    <div class="tile is-parent">
-                        <div id="app" class="tile is-child box">
-                            <div class="modal" v-bind:class="{ 'is-active': infoIsActive }">
-                                <div class="modal-background"></div>
-                                <div class="modal-content">
-                                    <div class="content box">
-                                        <ul>
-                                            <li>
-                                                You can define states that describe the program.
-                                            </li>
-                                            <li>
-                                                A state consists of a Instructions.
-                                            </li>
-                                            <li>
-                                                In each state the current letter is read from the tape and the instruction to be executed is identified. The output is written back to the tape, the cursor is moved in the direction and the next state is executed.
-                                            </li>
-                                            <li>
-                                                Empty fields on the tape  are represented with an '_'.
-                                            </li>
-                                            <li>
-                                                The program is finished when the final state is reached.
-                                            </li>
-                                            <li>
-                                                A state with no instructions is the final state.
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <button class="modal-close is-large" aria-label="close" @click="toggleInfo"></button>
-                            </div>
-                            <div class="field">
-                                <span class="icon clickable" @click="toggleInfo">
-                                    <i class="fas fa-info-circle"></i>
-                                </span>
-                            </div>
-                            <div class="field is-grouped">
-                                <div class="control">
-                                    <a id="run-button" class="button is-link" @click="run">Run</a>
-                                </div>
-                                <div class="control">
-                                    <a id="clear-button" class="button" @click="clear">Clear</a>
+        <div id="app">
+            <section class="section">
+                <nav class="navbar" role="navigation" aria-label="main navigation">
+                    <div id="navbarBasicExample" class="navbar-menu">
+                        <div class="navbar-start">
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    Load example program
+                                </a>
+
+                                <div class="navbar-dropdown">
+                                    <a class="navbar-item" @click="loadProgram('sort')">
+                                        Sorting
+                                    </a>
+                                    <a class="navbar-item" @click="loadProgram('toUpperCase')">
+                                        To upper case
+                                    </a>
                                 </div>
                             </div>
-                            <div class="field">
-                                <label for="word" class="label">Word</label>
-                                <div class="control">
-                                    <input id="word" type="text" name="word" required="required" class="input is-small" v-model="word" />
-                                </div>
-                            </div>
-                            <div class="tabs">
-                                <ul>
-                                    <li v-bind:class="{ 'is-active': selectedTab === 0 }"><a @click="selectTab(0)">Visual</a></li>
-                                    <li v-bind:class="{ 'is-active': selectedTab === 1 }"><a @click="selectTab(1)">Raw</a></li>
-                                </ul>
-                            </div>
-                            <div v-if="selectedTab === 0">
-                                <div class="box">
-                                    if input equals <input id="input-new" type="text" name="input-new" required="required" class="input is-small symbol-input" v-model="input" /><br />
-                                    then output should be <input id="output-new" type="text" name="output-new" required="required" class="input is-small symbol-input" v-model="output" /><br />
-                                    the tape should move to the
-                                    <div class="select is-small">
-                                        <select id="direction-new" v-model="direction">
-                                            <option>Left</option>
-                                            <option>Right</option>
-                                        </select>
-                                    </div>
-                                    <br />
-                                    and the next state should be <input id="next-state-new" type="text" name="next-state-new" required="required" class="input is-small symbol-input" v-model="next" />
-                                    <div class="field is-grouped">
-                                        <div class="control">
-                                            <button id="instruction-button" class="button is-text" @click="addInstruction">Add instruction</button>
-                                        </div>
-                                        <div class="control">
-                                            <button id="state-button" class="button is-text" @click="addState">Add state</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="box">
-                                    <h5 class="title is-5">Instructions for new state</h5>
-                                    <div v-for="(instruction, index) in instructions">
-                                        if input equals {{ instruction.precondition }} then return {{ instruction.postcondition }} and move {{ instruction.direction }}; Next state is {{ instruction.successor }} <a class="delete" @click="removeInstruction(index)"></a>
-                                    </div>
-                                </div>
-                                <div class="box">
-                                    <h4 class="title is-4">States</h4>
-                                    <table class="table is-striped is-fullwidth" v-if="states.length > 0">
-                                        <tr>
-                                            <th>Index</th>
-                                            <th>Instructions</th>
-                                            <th></th>
-                                        </tr>
-                                        <tr v-for="(state, index) in states" v-bind:class="{ 'is-selected': index === selectedStateIndex }">
-                                            <td>{{ index }}</td>
-                                            <td>
-                                                <div v-for="instruction in state.instructions">
-                                                    if input equals <b>{{ instruction.precondition }}</b> then return <b>{{ instruction.postcondition }}</b> and move <b>{{ instruction.direction }}</b>;<br />
-                                                    Next state is <b>{{ instruction.successor }}</b>
-                                                </div>
-                                                <div v-if="state.instructions.length === 0">
-                                                    Final State
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <a class="delete" @click="removeState(index)"></a>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                            <div v-if="selectedTab === 1">
-                                <textarea rows="25" cols="35" @blur="rawChanged" v-model="raw" class="box">
-                                </textarea>
+                        </div>
+
+                        <div class="navbar-end">
+                            <div class="navbar-item">
+                                View the code on&nbsp;<a href="https://github.com/gossie/turing-machine" target="_blank">Github</a><span class="icon"><i class="fab fa-github"></i></span>
                             </div>
                         </div>
                     </div>
+                </nav>
+            </section>
+            <section class="section">
+                <div class="tile is-ancestor is-vertical">
+                    <div class="tile is-parent">
+                        <div class="tile is-parent">
+                            <div class="tile is-child box">
+                                <div class="modal" v-bind:class="{ 'is-active': infoIsActive }">
+                                    <div class="modal-background"></div>
+                                    <div class="modal-content">
+                                        <div class="content box">
+                                            <ul>
+                                                <li>
+                                                    You can define states that describe the program.
+                                                </li>
+                                                <li>
+                                                    A state consists of a Instructions.
+                                                </li>
+                                                <li>
+                                                    In each state the current letter is read from the tape and the instruction to be executed is identified. The output is written back to the tape, the cursor is moved in the direction and the next state is executed.
+                                                </li>
+                                                <li>
+                                                    Empty fields on the tape  are represented with an '_'.
+                                                </li>
+                                                <li>
+                                                    The program is finished when the final state is reached.
+                                                </li>
+                                                <li>
+                                                    A state with no instructions is the final state.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <button class="modal-close is-large" aria-label="close" @click="toggleInfo"></button>
+                                </div>
+                                <div class="field">
+                                    <span class="icon clickable" @click="toggleInfo">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                </div>
+                                <div class="field">
+                                    <label for="word" class="label">Word</label>
+                                    <div class="control">
+                                        <input id="word" type="text" name="word" required="required" class="input is-small" v-model="word" />
+                                    </div>
+                                </div>
+                                <div class="tabs">
+                                    <ul>
+                                        <li v-bind:class="{ 'is-active': selectedTab === 0 }"><a @click="selectTab(0)">Visual</a></li>
+                                        <li v-bind:class="{ 'is-active': selectedTab === 1 }"><a @click="selectTab(1)">Raw</a></li>
+                                    </ul>
+                                </div>
+                                <div v-if="selectedTab === 0">
+                                    <div class="box">
+                                        if input equals <input id="input-new" type="text" name="input-new" required="required" class="input is-small symbol-input" v-model="input" /><br />
+                                        then output should be <input id="output-new" type="text" name="output-new" required="required" class="input is-small symbol-input" v-model="output" /><br />
+                                        the tape should move to the
+                                        <div class="select is-small">
+                                            <select id="direction-new" v-model="direction">
+                                                <option>Left</option>
+                                                <option>Right</option>
+                                            </select>
+                                        </div>
+                                        <br />
+                                        and the next state should be <input id="next-state-new" type="text" name="next-state-new" required="required" class="input is-small symbol-input" v-model="next" />
+                                        <div class="field is-grouped">
+                                            <div class="control">
+                                                <button id="instruction-button" class="button is-text" @click="addInstruction">Add instruction</button>
+                                            </div>
+                                            <div class="control">
+                                                <button id="state-button" class="button is-text" @click="addState">Add state</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="box">
+                                        <h5 class="title is-5">Instructions for new state</h5>
+                                        <div v-for="(instruction, index) in instructions">
+                                            if input equals {{ instruction.precondition }} then return {{ instruction.postcondition }} and move {{ instruction.direction }}; Next state is {{ instruction.successor }} <a class="delete" @click="removeInstruction(index)"></a>
+                                        </div>
+                                    </div>
+                                    <div class="box">
+                                        <h4 class="title is-4">States</h4>
+                                        <table class="table is-striped is-fullwidth" v-if="states.length > 0">
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Instructions</th>
+                                                <th></th>
+                                            </tr>
+                                            <tr v-for="(state, index) in states" v-bind:class="{ 'is-selected': index === selectedStateIndex }">
+                                                <td>{{ index }}</td>
+                                                <td>
+                                                    <div v-for="instruction in state.instructions">
+                                                        if input equals <b>{{ instruction.precondition }}</b> then return <b>{{ instruction.postcondition }}</b> and move <b>{{ instruction.direction }}</b>;<br />
+                                                        Next state is <b>{{ instruction.successor }}</b>
+                                                    </div>
+                                                    <div v-if="state.instructions.length === 0">
+                                                        Final State
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a class="delete" @click="removeState(index)"></a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div v-if="selectedTab === 1">
+                                    <textarea rows="25" cols="35" @blur="rawChanged" v-model="raw" class="box">
+                                    </textarea>
+                                </div>
+
+                                <div style="margin-top: 15px" class="field is-grouped">
+                                    <div class="control">
+                                        <a id="run-button" class="button is-link" @click="run">Run</a>
+                                    </div>
+                                    <div class="control">
+                                        <a id="clear-button" class="button" @click="clear">Clear</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <section class="section">
+            <div class="tile is-ancestor">
+                <div class="tile is-parent">
                     <div class="tile is-parent">
                         <div class="tile is-child box">
                             <div id="canvas" class="tile is-child box table-container"></div>

@@ -9,6 +9,7 @@ import StateManager from './state-manager';
 
 export default class TuringMachine {
 
+    private _paused: boolean = false;
     private _tape: Tape;
     private _stateManager: StateManager;
     private _stepDelay: number;
@@ -100,6 +101,10 @@ export default class TuringMachine {
     private handleError(error: Error): void {
         this._subscription.unsubscribe();
         console.error('error', error);
+    }
+
+    public pause(): void {
+        this._paused = true;
     }
 
     public reset(): void {

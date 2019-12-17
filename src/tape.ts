@@ -37,7 +37,7 @@ export default class Tape {
 
     private moveRight(): void {
         this._index++;
-        if(this._index >= this._tape.length) {
+        if (this._index >= this._tape.length) {
             this._tape.push('_');
         }
     }

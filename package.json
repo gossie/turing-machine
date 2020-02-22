@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "karma start --singleRun=true",
+        "test": "karma start --singleRun=true --browsers ChromeHeadlessNoSandbox",
         "test:watch": "karma start",
         "build": "webpack-cli",
         "serve": "webpack-dev-server --no-inline",

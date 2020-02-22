@@ -22,7 +22,8 @@
                         infoIsActive: false,
                         selectedTab: 0,
                         raw: '',
-                        navbarExpanded: false
+                        navbarExpanded: false,
+                        errorMessage: ''
                     },
                     methods: {
                         addInstruction: function() {
@@ -41,6 +42,7 @@
                             this.raw = JSON.stringify(this.states, undefined, 2);
                         },
                         run: function() {
+                            this.errorMessage = '';
                             const turingMachine = window['turingMachine'];
 
                             if (this.subscription != null) {
@@ -51,20 +53,27 @@
                                 .subscribe(event => {
                                     if (event.type === 2) {
                                         this.selectedStateIndex = this.states.indexOf(event.payload.state);
+                                    } else if (event.type === 4) {
+                                        this.errorMessage = event.payload.message;
                                     }
                                 });
 
-                            turingMachine.reset();
-                            turingMachine.loadWord(this.word);
-                            turingMachine.loadProgram(this.states);
-                            turingMachine.run();
-                            this.selectedStateIndex = 0;
+                            try{
+                                turingMachine.reset();
+                                turingMachine.loadWord(this.word);
+                                turingMachine.loadProgram(this.states);
+                                turingMachine.run();
+                                this.selectedStateIndex = 0;
+                            } catch (e) {
+                                this.errorMessage = e.message;
+                            }
                         },
                         clear: function() {
                             this.states = [];
                             this.instructions = [];
                             this.selectedStateIndex = -1;
                             this.raw = '';
+                            this.errorMessage = '';
                         },
                         removeState: function(index) {
                             this.states.splice(index, 1);
@@ -273,6 +282,9 @@
                                     <div class="control">
                                         <a id="clear-button" class="button" @click="clear">Clear</a>
                                     </div>
+                                </div>
+                                <div class="has-text-danger">
+                                    {{ errorMessage }}
                                 </div>
                             </div>
                         </div>

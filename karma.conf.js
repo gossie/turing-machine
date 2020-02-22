@@ -14,13 +14,13 @@ module.exports = (config) => {
             clearContext: false // leave Jasmine Spec Runner output visible in browser
         },
         files: [{
-            pattern: 'spec/**/*.spec.ts'
+            pattern: 'src/**/*.spec.ts'
         }],
         mime: {
             'text/x-typescript': ['ts', 'tsx']
         },
         preprocessors: {
-            'spec/**/*.spec.ts': ['webpack']
+            'src/**/*.spec.ts': ['webpack']
         },
         webpack: require('./webpack.config'),
         reporters: ['spec', 'kjhtml'],

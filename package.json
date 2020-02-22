@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "karma start",
+        "test": "karma start --singleRun=true",
+        "test:watch": "karma start",
         "build": "webpack-cli",
         "serve": "webpack-dev-server --no-inline",
         "lint": "tslint -c tslint.json 'src/**/*.ts'"

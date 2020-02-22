@@ -35,9 +35,14 @@ export default class Tape {
         this._directionStrategies.get(direction)();
     }
 
+    public reset(): void {
+        this._index = 0;
+        this._tape = [];
+    }
+
     private moveRight(): void {
         this._index++;
-        if(this._index >= this._tape.length) {
+        if (this._index >= this._tape.length) {
             this._tape.push('_');
         }
     }
@@ -48,10 +53,5 @@ export default class Tape {
             this._tape.unshift('_');
             this._index = 0;
         }
-    }
-
-    public reset(): void {
-        this._index = 0;
-        this._tape = [];
     }
 }

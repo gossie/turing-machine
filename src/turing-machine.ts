@@ -23,6 +23,9 @@ export default class TuringMachine {
     }
 
     public loadProgram(states: State[]): void {
+        if (!states || states.length === 0) {
+            throw new Error('no program provided');
+        }
         states.forEach((state: State) => this._stateManager.addState(state));
     }
 
@@ -93,14 +96,14 @@ export default class TuringMachine {
 
     private performStep(executionResult: ExecutionResult): void {
         if (executionResult.finished) {
-            this._tapeSubject.next(new Event(EventType.FINISHED, {}));
+            this._tapeSubject.next(new Event(EventType.FINISHED));
             this._subscription.unsubscribe();
         }
     }
 
     private handleError(error: Error): void {
         this._subscription.unsubscribe();
-        console.error('error', error);
+        this._tapeSubject.next(new Event(EventType.ERROR, { message: error.message }));
     }
 
     public pause(): void {

@@ -77,9 +77,7 @@ drawMachine();
 
 function drawWord(tape: Tape): void {
     const currentIndex: number = tape.currentIndex;
-    for (let i=0; i<tape.word.length; i++) {
-        ctx.fillText(tape.word[i], 252 + (i*FIELD_WIDTH) - (currentIndex*FIELD_WIDTH), 117);
-    }
+    tape.word.forEach((letter, i) => ctx.fillText(letter, 252 + (i*FIELD_WIDTH) - (currentIndex*FIELD_WIDTH), 117));
 }
 
 const subscription: Subscription = turingMachine.observeState()

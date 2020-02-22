@@ -22,7 +22,8 @@
                         infoIsActive: false,
                         selectedTab: 0,
                         raw: '',
-                        navbarExpanded: false
+                        navbarExpanded: false,
+                        errorMessage: ''
                     },
                     methods: {
                         addInstruction: function() {
@@ -41,6 +42,7 @@
                             this.raw = JSON.stringify(this.states, undefined, 2);
                         },
                         run: function() {
+                            this.errorMessage = '';
                             const turingMachine = window['turingMachine'];
 
                             if (this.subscription != null) {
@@ -51,18 +53,27 @@
                                 .subscribe(event => {
                                     if (event.type === 2) {
                                         this.selectedStateIndex = this.states.indexOf(event.payload.state);
+                                    } else if (event.type === 4) {
+                                        this.errorMessage = event.payload.message;
                                     }
                                 });
 
-                            turingMachine.reset();
-                            turingMachine.loadWord(this.word);
-                            turingMachine.loadProgram(this.states);
-                            turingMachine.run();
-                            this.selectedStateIndex = 0;
+                            try{
+                                turingMachine.reset();
+                                turingMachine.loadWord(this.word);
+                                turingMachine.loadProgram(this.states);
+                                turingMachine.run();
+                                this.selectedStateIndex = 0;
+                            } catch (e) {
+                                this.errorMessage = e.message;
+                            }
                         },
                         clear: function() {
                             this.states = [];
                             this.instructions = [];
+                            this.selectedStateIndex = -1;
+                            this.raw = '';
+                            this.errorMessage = '';
                         },
                         removeState: function(index) {
                             this.states.splice(index, 1);
@@ -81,7 +92,7 @@
                         },
                         loadProgram: function(program) {
                             if (program === 'sort') {
-                                this.raw = JSON.stringify(JSON.parse('[{"instructions":[{"precondition":"a","postcondition":"a","direction":"Right","successor":0},{"precondition":"b","postcondition":"b","direction":"Right","successor":"1"}]},{"instructions":[{"precondition":"b","postcondition":"b","direction":"Right","successor":"1"},{"precondition":"a","postcondition":"*","direction":"Left","successor":"2"},{"precondition":"_","postcondition":"_","direction":"Left","successor":10}]},{"instructions":[{"precondition":"b","postcondition":"b","direction":"Left","successor":"2"},{"precondition":"a","postcondition":"a","direction":"Left","successor":"2"},{"precondition":"_","postcondition":"a","direction":"Right","successor":"3"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Right","successor":"3"},{"precondition":"b","postcondition":"b","direction":"Right","successor":"3"},{"precondition":"*","postcondition":"*","direction":"Right","successor":"4"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"5"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"6"},{"precondition":"_","postcondition":"_","direction":"Left","successor":"7"}]},{"instructions":[{"precondition":"*","postcondition":"a","direction":"Right","successor":"8"}]},{"instructions":[{"precondition":"*","postcondition":"b","direction":"Right","successor":"8"}]},{"instructions":[{"precondition":"*","postcondition":"_","direction":"Left","successor":"9"}]},{"instructions":[{"precondition":"a","postcondition":"*","direction":"Right","successor":"4"},{"precondition":"b","postcondition":"*","direction":"Right","successor":"4"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"9"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"9"},{"precondition":"_","postcondition":"_","direction":"Right","successor":"0"}]},{"instructions":[]}]'), undefined, 2);
+                                this.raw = JSON.stringify(JSON.parse('[{"instructions":[{"precondition":"a","postcondition":"a","direction":"Right","successor":0},{"precondition":"b","postcondition":"b","direction":"Right","successor":"1"},{"precondition":"_","postcondition":"_","direction":"Left","successor":12}]},{"instructions":[{"precondition":"b","postcondition":"b","direction":"Right","successor":"1"},{"precondition":"a","postcondition":"*","direction":"Left","successor":"2"},{"precondition":"_","postcondition":"_","direction":"Left","successor":12}]},{"instructions":[{"precondition":"b","postcondition":"b","direction":"Left","successor":"2"},{"precondition":"a","postcondition":"a","direction":"Left","successor":"2"},{"precondition":"_","postcondition":"a","direction":"Right","successor":"3"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Right","successor":"3"},{"precondition":"b","postcondition":"b","direction":"Right","successor":"3"},{"precondition":"*","postcondition":"*","direction":"Right","successor":"4"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"5"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"6"},{"precondition":"_","postcondition":"_","direction":"Left","successor":"7"}]},{"instructions":[{"precondition":"*","postcondition":"a","direction":"Right","successor":"8"}]},{"instructions":[{"precondition":"*","postcondition":"b","direction":"Right","successor":"8"}]},{"instructions":[{"precondition":"*","postcondition":"_","direction":"Left","successor":"9"}]},{"instructions":[{"precondition":"a","postcondition":"*","direction":"Right","successor":"4"},{"precondition":"b","postcondition":"*","direction":"Right","successor":"4"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"10"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"9"},{"precondition":"_","postcondition":"_","direction":"Right","successor":"12"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"10"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"11"},{"precondition":"_","postcondition":"_","direction":"Right","successor":"12"}]},{"instructions":[{"precondition":"a","postcondition":"a","direction":"Left","successor":"11"},{"precondition":"b","postcondition":"b","direction":"Left","successor":"11"},{"precondition":"_","postcondition":"_","direction":"Right","successor":"0"}]},{"instructions":[]}]'));
                                 this.word = 'ababbabbaa';
                             } else if(program === 'toUpperCase') {
                                 this.raw = JSON.stringify(JSON.parse('[{"instructions": [{"precondition": "a","postcondition": "A","direction": "Right","successor": 0},{"precondition": "b","postcondition": "B","direction": "Right","successor": 0},{"precondition": "_","postcondition": "_","direction": "Left","successor": "1"}]},{"instructions": []}]'), undefined, 2);
@@ -121,6 +132,7 @@
         </style>
     </head>
     <body>
+        <a href="https://github.com/gossie/turing-machine"><img width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_left_gray_6d6d6d.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
         <div id="app">
             <section class="section">
                 <nav class="navbar" role="navigation" aria-label="main navigation">
@@ -149,12 +161,6 @@
                                         Inverter
                                     </a>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="navbar-end">
-                            <div class="navbar-item">
-                                View the code on&nbsp;<a href="https://github.com/gossie/turing-machine" target="_blank">Github</a><span class="icon"><i class="fab fa-github"></i></span>
                             </div>
                         </div>
                     </div>
@@ -276,6 +282,9 @@
                                     <div class="control">
                                         <a id="clear-button" class="button" @click="clear">Clear</a>
                                     </div>
+                                </div>
+                                <div class="has-text-danger">
+                                    {{ errorMessage }}
                                 </div>
                             </div>
                         </div>

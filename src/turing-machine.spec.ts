@@ -40,7 +40,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 100);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('a');
 
@@ -72,7 +72,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 100);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('b');
 
@@ -109,7 +109,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 100);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('ab');
 
@@ -136,6 +136,163 @@ describe('Turing Machine', () => {
                         expect(actualEvents).toEqual(expectedEvents);
                         subscription.unsubscribe();
                         done();
+                    }
+                });
+
+            turingMachine.run();
+        });
+
+    });
+
+    describe('debugging', () => {
+
+        it('should throw error if execution is paused', (done) => {
+            const states = [
+                new State([
+                    new Instruction('a', 'b', Direction.RIGHT, 0),
+                    new Instruction('b', 'a', Direction.RIGHT, 0),
+                    new Instruction('_', '_', Direction.RIGHT, 1),
+                ]),
+                new State([])
+            ];
+
+            const tape = new Tape();
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            turingMachine.loadProgram(states);
+            turingMachine.loadWord('ab');
+
+            const actualEvents: Array<Event> = [];
+            const subscription = turingMachine.observeState()
+                .subscribe((event: Event) => {
+                    actualEvents.push(event);
+                    fail('events are not expected');
+                });
+
+            turingMachine.run();
+            turingMachine.pause();
+
+            setTimeout(() => {
+                subscription.unsubscribe();
+                expect(actualEvents).toEqual([]);
+                turingMachine.reset();
+                done();
+            }, 500);
+        });
+
+        it('should run after pause', (done) => {
+            const states = [
+                new State([
+                    new Instruction('a', 'b', Direction.RIGHT, 0),
+                    new Instruction('b', 'a', Direction.RIGHT, 0),
+                    new Instruction('_', '_', Direction.RIGHT, 1),
+                ]),
+                new State([])
+            ];
+
+            const tape = new Tape();
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            turingMachine.loadProgram(states);
+            turingMachine.loadWord('ab');
+
+            const actualEvents = [];
+            const expectedEvents = [
+                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
+                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
+                new Event(EventType.SYMBOL_WRITE, { state: states[0], tape }),
+                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
+                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
+                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
+                new Event(EventType.SYMBOL_WRITE, { state: states[0], tape }),
+                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
+                new Event(EventType.SYMBOL_READ, { symbol: '_' }),
+                new Event(EventType.SYMBOL_READ, { symbol: '_' }),
+                new Event(EventType.SYMBOL_WRITE, { state: states[1], tape }),
+                new Event(EventType.TAPE_MOVE, { state: states[1], tape }),
+                new Event(EventType.FINISHED)
+            ];
+            const subscription = turingMachine.observeState()
+                .subscribe((event: Event) => {
+                    actualEvents.push(event);
+                    if (actualEvents.length === expectedEvents.length) {
+                        expect(actualEvents).toEqual(expectedEvents);
+                        subscription.unsubscribe();
+                        done();
+                    }
+                });
+
+            turingMachine.run();
+            turingMachine.pause();
+            turingMachine.unpause();
+        });
+
+        it('should step through the program', (done) => {
+            const states = [
+                new State([
+                    new Instruction('a', 'b', Direction.RIGHT, 0),
+                    new Instruction('b', 'a', Direction.RIGHT, 0),
+                    new Instruction('_', '_', Direction.RIGHT, 1),
+                ]),
+                new State([])
+            ];
+
+            const tape = new Tape();
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            turingMachine.loadProgram(states);
+            turingMachine.loadWord('ab');
+
+            const subscription = turingMachine.observeState()
+                .subscribe((event: Event) => {
+                    expect(event).toEqual(new Event(EventType.SYMBOL_READ, { symbol: 'a' }));
+                    subscription.unsubscribe();
+                    turingMachine.reset();
+                    done();
+                });
+
+            turingMachine.run();
+            turingMachine.pause();
+            turingMachine.step();
+        });
+
+        it('should pass the finished check when debugging', (done) => {
+            const states = [
+                new State([
+                    new Instruction('a', 'b', Direction.RIGHT, 0),
+                    new Instruction('b', 'a', Direction.RIGHT, 0),
+                    new Instruction('_', '_', Direction.RIGHT, 1),
+                ]),
+                new State([])
+            ];
+
+            const tape = new Tape();
+            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            turingMachine.loadProgram(states);
+            turingMachine.loadWord('ab');
+
+            let recordEvents = false;
+            const recordedEvents: Array<Event> = [];
+            const subscription = turingMachine.observeState()
+                .subscribe((event: Event) => {
+                    if (event.type === EventType.SYMBOL_WRITE) {
+                        turingMachine.pause();
+                        recordEvents = true;
+                        setTimeout(() => {
+                            turingMachine.step();
+                            setTimeout(() => turingMachine.step());
+                        });
+                    } else {
+                        if (recordEvents) {
+                            recordedEvents.push(event);
+                        }
+
+                        if (recordedEvents.length === 2) {
+                            expect(recordedEvents).toEqual([
+                                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
+                                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
+                            ]);
+                            subscription.unsubscribe();
+                            turingMachine.reset();
+                            done();
+                        }
                     }
                 });
 

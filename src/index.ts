@@ -38,7 +38,7 @@ function drawSymbolBox(): void {
 function drawSymbolInBox(symbol: string): void {
     ctx.clearRect(241, 101, 30, 22);
     ctx.clearRect(241, 17, 30, 22);
-    ctx.font = "17px Arial";
+    ctx.font = '17px Arial';
     ctx.fillText(symbol, 251, 33);
 }
 
@@ -57,7 +57,7 @@ function drawTape(): void {
     ctx.moveTo(0, 124);
     ctx.lineTo(512, 124);
 
-    for (let x=16; x<512; x+=FIELD_WIDTH) {
+    for (let x = 16; x < 512; x += FIELD_WIDTH) {
         ctx.moveTo(x, 100);
         ctx.lineTo(x, 124);
     }
@@ -71,10 +71,11 @@ function drawMachine(): void {
     drawArrow();
     drawTape();
 
-    ctx.font = "17px Arial";
+    try {
+        ctx.font = '17px Arial';
+    } catch (e) { }
 }
 drawMachine();
-
 function drawWord(tape: Tape): void {
     const currentIndex: number = tape.currentIndex;
     tape.word.forEach((letter, i) => ctx.fillText(letter, 252 + (i*FIELD_WIDTH) - (currentIndex*FIELD_WIDTH), 117));

@@ -17,6 +17,13 @@ export default class TuringMachine {
     private subscription: Subscription;
     private currentState = 0;
     private lastExecutionResult: ExecutionResult = undefined;
+    private steps = new Map<number, () => void>([
+        [0, () => this.readSymbol()],
+        [1, () => this.execute()],
+        [2, () => this.writeSymbol(this.lastExecutionResult)],
+        [3, () => this.move(this.lastExecutionResult)],
+        [4, () => this.handleFinishIfNecessary()]
+    ]);
 
     constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 250) {
         this.tape = tape;
@@ -89,12 +96,11 @@ export default class TuringMachine {
         }));
     }
 
-    private execute(): ExecutionResult {
-        const executionResult: ExecutionResult = this.stateManager.execute(this.tape.current);
+    private execute(): void {
+        this.lastExecutionResult = this.stateManager.execute(this.tape.current);
         this.tapeSubject.next(new Event(EventType.SYMBOL_READ, {
-            symbol: executionResult.symbol
+            symbol: this.lastExecutionResult.symbol
         }));
-        return executionResult;
     }
 
     private writeSymbol(executionResult: ExecutionResult): void {;
@@ -105,36 +111,25 @@ export default class TuringMachine {
         }));
     }
 
-    private move(executionResult: ExecutionResult): ExecutionResult {
+    private move(executionResult: ExecutionResult): void {
         this.tape.move(executionResult.direction);
         this.tapeSubject.next(new Event(EventType.TAPE_MOVE, {
             state: this.stateManager.currentState,
             tape: this.tape
         }));
-        return executionResult;
+    }
+
+    private handleFinishIfNecessary(): void {
+        if (this.lastExecutionResult.finished) {
+            this.tapeSubject.next(new Event(EventType.FINISHED));
+            this.subscription.unsubscribe();
+        }
     }
 
     private performStep(force: boolean = false): void {
         if (!this.paused || force) {
-            if (this.currentState === 0) {
-                this.readSymbol();
-                ++this.currentState;
-            } else if (this.currentState === 1) {
-                this.lastExecutionResult = this.execute();
-                ++this.currentState;
-            } else if (this.currentState === 2) {
-                this.writeSymbol(this.lastExecutionResult);
-                ++this.currentState;
-            } else if (this.currentState === 3) {
-                this.lastExecutionResult = this.move(this.lastExecutionResult);
-                ++this.currentState;
-            } else if (this.currentState === 4) {
-                if (this.lastExecutionResult.finished) {
-                    this.tapeSubject.next(new Event(EventType.FINISHED));
-                    this.subscription.unsubscribe();
-                }
-                this.currentState = 0;
-            }
+            this.steps.get(this.currentState)();
+            this.currentState < 4 ? ++this.currentState : this.currentState = 0;
         }
     }
 

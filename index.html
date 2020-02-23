@@ -23,7 +23,9 @@
                         selectedTab: 0,
                         raw: '',
                         navbarExpanded: false,
-                        errorMessage: ''
+                        errorMessage: '',
+                        paused: false,
+                        pauseButtonLabel: 'Pause'
                     },
                     methods: {
                         addInstruction: function() {
@@ -107,6 +109,20 @@
                         },
                         toggleNavbar: function() {
                             this.navbarExpanded = !this.navbarExpanded;
+                        },
+                        pause: function() {
+                            const turingMachine = window['turingMachine'];
+                            if (this.paused) {
+                                turingMachine.unpause();
+                                this.pauseButtonLabel = 'Pause';
+                            } else {
+                                turingMachine.pause();
+                                this.pauseButtonLabel = 'Unpause';
+                            }
+                            this.paused = !this.paused;
+                        },
+                        step: function() {
+                            turingMachine.step();
                         }
                     }
                 });
@@ -285,6 +301,25 @@
                                 </div>
                                 <div class="has-text-danger">
                                     {{ errorMessage }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="section">
+                <div class="tile is-ancestor">
+                    <div class="tile is-parent">
+                        <div class="tile is-parent">
+                            <div class="tile is-child box">
+                                <div class="field is-grouped">
+                                    <div class="control">
+                                        <a id="pause-button" class="button is-link" @click="pause">{{ pauseButtonLabel }}</a>
+                                    </div>
+                                    <div class="control">
+                                        <a id="step-button" class="button" v-if="paused" @click="step">Step</a>
+                                        <a id="step-button" class="button" v-else disabled>Step</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

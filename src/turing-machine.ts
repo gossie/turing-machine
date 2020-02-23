@@ -1,116 +1,146 @@
 import { interval, Observable, Subject, Subscription } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';
-import { EventType } from './event-type';
+import { tap } from 'rxjs/operators';
 import Event from './event';
+import { EventType } from './event-type';
 import ExecutionResult from './execution-result';
-import Tape from './tape';
 import State from './state';
 import StateManager from './state-manager';
+import Tape from './tape';
 
 export default class TuringMachine {
 
-    private _tape: Tape;
-    private _stateManager: StateManager;
-    private _stepDelay: number;
-    private _tapeSubject: Subject<Event> = new Subject();
-    private _subscription: Subscription;
+    private paused: boolean = false;
+    private tape: Tape;
+    private stateManager: StateManager;
+    private stepDelay: number;
+    private tapeSubject: Subject<Event> = new Subject();
+    private subscription: Subscription;
+    private currentState = 0;
+    private lastExecutionResult: ExecutionResult = undefined;
 
     constructor(tape: Tape, stateManager: StateManager, stepDelay: number = 250) {
-        this._tape = tape;
-        this._stateManager = stateManager;
-        this._stepDelay = stepDelay;
+        this.tape = tape;
+        this.stateManager = stateManager;
+        this.stepDelay = stepDelay;
     }
 
-    public loadProgram(states: State[]): void {
+    public loadProgram(states: Array<State>): void {
         if (!states || states.length === 0) {
             throw new Error('no program provided');
         }
-        states.forEach((state: State) => this._stateManager.addState(state));
+        states.forEach((state: State) => this.stateManager.addState(state));
     }
 
     public loadWord(word: string): void {
         const wordArray: Array<string> = [];
-        for (let i=0; i<word.length; i++) {
+        for (let i = 0; i < word.length; i++) {
             wordArray.push(word.charAt(i));
         }
-        this._tape.word = wordArray;
-        this._tapeSubject.next(new Event(EventType.TAPE_MOVE, {
-            state: this._stateManager.currentState,
-            tape: this._tape
+        this.tape.word = wordArray;
+        this.tapeSubject.next(new Event(EventType.TAPE_MOVE, {
+            state: this.stateManager.currentState,
+            tape: this.tape
         }));
     }
 
     public observeState(): Observable<Event> {
-        return this._tapeSubject.asObservable();
+        return this.tapeSubject.asObservable();
+    }
+
+    public pause(): void {
+        this.paused = true;
+    }
+
+    public unpause(): void {
+        this.paused = false;
+    }
+
+    public reset(): void {
+        this.tape.reset();
+        this.stateManager.reset();
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
+    }
+
+    public step(): void {
+        if (!this.subscription.closed){
+            this.performStep(true);
+            if (this.currentState === 4) {
+                this.performStep(true);
+            }
+        }
     }
 
     public run(): void {
-        this._subscription = interval(this._stepDelay * 5)
+        this.subscription = interval(this.stepDelay)
             .pipe(
-                tap(() => this.readSymbol()),
-                delay(this._stepDelay),
-                map(() => this.execute()),
-                delay(this._stepDelay),
-                tap((executionResult: ExecutionResult) => this.writeSymbol(executionResult)),
-                delay(this._stepDelay),
-                tap((executionResult: ExecutionResult) => this.move(executionResult)),
-                delay(this._stepDelay),
+                tap(() => this.performStep())
             )
             .subscribe(
-                (executionResult: ExecutionResult) => this.performStep(executionResult),
+                () => console.debug('step was performed'),
                 (error: Error) => this.handleError(error)
             );
     }
 
     private readSymbol(): void {;
-        this._tapeSubject.next(new Event(EventType.SYMBOL_READ, {
-            symbol: this._tape.current
+        this.tapeSubject.next(new Event(EventType.SYMBOL_READ, {
+            symbol: this.tape.current
         }));
     }
 
     private execute(): ExecutionResult {
-        const executionResult: ExecutionResult = this._stateManager.execute(this._tape.current);
-        this._tapeSubject.next(new Event(EventType.SYMBOL_READ, {
+        const executionResult: ExecutionResult = this.stateManager.execute(this.tape.current);
+        this.tapeSubject.next(new Event(EventType.SYMBOL_READ, {
             symbol: executionResult.symbol
         }));
         return executionResult;
     }
 
     private writeSymbol(executionResult: ExecutionResult): void {;
-        this._tape.writeSymbol(executionResult.symbol);
-        this._tapeSubject.next(new Event(EventType.SYMBOL_WRITE, {
-            state: this._stateManager.currentState,
-            tape: this._tape
+        this.tape.writeSymbol(executionResult.symbol);
+        this.tapeSubject.next(new Event(EventType.SYMBOL_WRITE, {
+            state: this.stateManager.currentState,
+            tape: this.tape
         }));
     }
 
     private move(executionResult: ExecutionResult): ExecutionResult {
-        this._tape.move(executionResult.direction);
-        this._tapeSubject.next(new Event(EventType.TAPE_MOVE, {
-            state: this._stateManager.currentState,
-            tape: this._tape
+        this.tape.move(executionResult.direction);
+        this.tapeSubject.next(new Event(EventType.TAPE_MOVE, {
+            state: this.stateManager.currentState,
+            tape: this.tape
         }));
         return executionResult;
     }
 
-    private performStep(executionResult: ExecutionResult): void {
-        if (executionResult.finished) {
-            this._tapeSubject.next(new Event(EventType.FINISHED));
-            this._subscription.unsubscribe();
+    private performStep(force: boolean = false): void {
+        if (!this.paused || force) {
+            if (this.currentState === 0) {
+                this.readSymbol();
+                ++this.currentState;
+            } else if (this.currentState === 1) {
+                this.lastExecutionResult = this.execute();
+                ++this.currentState;
+            } else if (this.currentState === 2) {
+                this.writeSymbol(this.lastExecutionResult);
+                ++this.currentState;
+            } else if (this.currentState === 3) {
+                this.lastExecutionResult = this.move(this.lastExecutionResult);
+                ++this.currentState;
+            } else if (this.currentState === 4) {
+                if (this.lastExecutionResult.finished) {
+                    this.tapeSubject.next(new Event(EventType.FINISHED));
+                    this.subscription.unsubscribe();
+                }
+                this.currentState = 0;
+            }
         }
     }
 
     private handleError(error: Error): void {
-        this._subscription.unsubscribe();
-        this._tapeSubject.next(new Event(EventType.ERROR, { message: error.message }));
-    }
-
-    public reset(): void {
-        this._tape.reset();
-        this._stateManager.reset();
-        if (this._subscription) {
-            this._subscription.unsubscribe();
-        }
+        this.subscription.unsubscribe();
+        this.tapeSubject.next(new Event(EventType.ERROR, { message: error.message }));
     }
 
 }

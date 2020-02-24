@@ -46,8 +46,8 @@ describe('Turing Machine', () => {
 
             const actualEvents = [];
             const expectedEvents = [
-                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
-                new Event(EventType.ERROR, { message: 'No instruction found for symbol a' })
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'a' }),
+                new Event(EventType.ERROR, 'error', { message: 'No instruction found for symbol a' })
             ];
             const subscription = turingMachine.observeState()
                 .subscribe((event: Event) => {
@@ -78,8 +78,8 @@ describe('Turing Machine', () => {
 
             const actualEvents = [];
             const expectedEvents = [
-                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
-                new Event(EventType.ERROR, { message: 'No state found for index 2' })
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'b' }),
+                new Event(EventType.ERROR, 'error', { message: 'No state found for index 2' })
             ];
             const subscription = turingMachine.observeState()
                 .subscribe((event: Event) => {
@@ -115,19 +115,19 @@ describe('Turing Machine', () => {
 
             const actualEvents = [];
             const expectedEvents = [
-                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
-                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
-                new Event(EventType.SYMBOL_WRITE, { state: states[0], tape }),
-                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
-                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
-                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
-                new Event(EventType.SYMBOL_WRITE, { state: states[0], tape }),
-                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
-                new Event(EventType.SYMBOL_READ, { symbol: '_' }),
-                new Event(EventType.SYMBOL_READ, { symbol: '_' }),
-                new Event(EventType.SYMBOL_WRITE, { state: states[1], tape }),
-                new Event(EventType.TAPE_MOVE, { state: states[1], tape }),
-                new Event(EventType.FINISHED)
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'a' }),
+                new Event(EventType.SYMBOL_READ, 'execute', { symbol: 'b' }),
+                new Event(EventType.SYMBOL_WRITE, 'write', { state: states[0], tape }),
+                new Event(EventType.TAPE_MOVE, 'move', { state: states[0], tape }),
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'b' }),
+                new Event(EventType.SYMBOL_READ, 'execute', { symbol: 'a' }),
+                new Event(EventType.SYMBOL_WRITE, 'write', { state: states[0], tape }),
+                new Event(EventType.TAPE_MOVE, 'move', { state: states[0], tape }),
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: '_' }),
+                new Event(EventType.SYMBOL_READ, 'execute', { symbol: '_' }),
+                new Event(EventType.SYMBOL_WRITE, 'write', { state: states[1], tape }),
+                new Event(EventType.TAPE_MOVE, 'move', { state: states[1], tape }),
+                new Event(EventType.FINISHED, 'finished')
             ];
             const subscription = turingMachine.observeState()
                 .subscribe((event: Event) => {
@@ -196,19 +196,19 @@ describe('Turing Machine', () => {
 
             const actualEvents = [];
             const expectedEvents = [
-                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
-                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
-                new Event(EventType.SYMBOL_WRITE, { state: states[0], tape }),
-                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
-                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
-                new Event(EventType.SYMBOL_READ, { symbol: 'a' }),
-                new Event(EventType.SYMBOL_WRITE, { state: states[0], tape }),
-                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
-                new Event(EventType.SYMBOL_READ, { symbol: '_' }),
-                new Event(EventType.SYMBOL_READ, { symbol: '_' }),
-                new Event(EventType.SYMBOL_WRITE, { state: states[1], tape }),
-                new Event(EventType.TAPE_MOVE, { state: states[1], tape }),
-                new Event(EventType.FINISHED)
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'a' }),
+                new Event(EventType.SYMBOL_READ, 'execute', { symbol: 'b' }),
+                new Event(EventType.SYMBOL_WRITE, 'write', { state: states[0], tape }),
+                new Event(EventType.TAPE_MOVE, 'move', { state: states[0], tape }),
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'b' }),
+                new Event(EventType.SYMBOL_READ, 'execute', { symbol: 'a' }),
+                new Event(EventType.SYMBOL_WRITE, 'write', { state: states[0], tape }),
+                new Event(EventType.TAPE_MOVE, 'move', { state: states[0], tape }),
+                new Event(EventType.SYMBOL_READ, 'read', { symbol: '_' }),
+                new Event(EventType.SYMBOL_READ, 'execute', { symbol: '_' }),
+                new Event(EventType.SYMBOL_WRITE, 'write', { state: states[1], tape }),
+                new Event(EventType.TAPE_MOVE, 'move', { state: states[1], tape }),
+                new Event(EventType.FINISHED, 'finished')
             ];
             const subscription = turingMachine.observeState()
                 .subscribe((event: Event) => {
@@ -242,7 +242,7 @@ describe('Turing Machine', () => {
 
             const subscription = turingMachine.observeState()
                 .subscribe((event: Event) => {
-                    expect(event).toEqual(new Event(EventType.SYMBOL_READ, { symbol: 'a' }));
+                    expect(event).toEqual(new Event(EventType.SYMBOL_READ, 'read', { symbol: 'a' }));
                     subscription.unsubscribe();
                     turingMachine.reset();
                     done();
@@ -286,8 +286,8 @@ describe('Turing Machine', () => {
 
                         if (recordedEvents.length === 2) {
                             expect(recordedEvents).toEqual([
-                                new Event(EventType.TAPE_MOVE, { state: states[0], tape }),
-                                new Event(EventType.SYMBOL_READ, { symbol: 'b' }),
+                                new Event(EventType.TAPE_MOVE, 'move', { state: states[0], tape }),
+                                new Event(EventType.SYMBOL_READ, 'read', { symbol: 'b' }),
                             ]);
                             subscription.unsubscribe();
                             turingMachine.reset();

@@ -44,7 +44,7 @@ export default class TuringMachine {
             wordArray.push(word.charAt(i));
         }
         this.tape.word = wordArray;
-        this.tapeSubject.next(new Event(EventType.TAPE_MOVE, {
+        this.tapeSubject.next(new Event(EventType.TAPE_MOVE, 'move', {
             state: this.stateManager.currentState,
             tape: this.tape
         }));
@@ -91,21 +91,21 @@ export default class TuringMachine {
     }
 
     private readSymbol(): void {;
-        this.tapeSubject.next(new Event(EventType.SYMBOL_READ, {
+        this.tapeSubject.next(new Event(EventType.SYMBOL_READ, 'read', {
             symbol: this.tape.current
         }));
     }
 
     private execute(): void {
         this.lastExecutionResult = this.stateManager.execute(this.tape.current);
-        this.tapeSubject.next(new Event(EventType.SYMBOL_READ, {
+        this.tapeSubject.next(new Event(EventType.SYMBOL_READ, 'execute', {
             symbol: this.lastExecutionResult.symbol
         }));
     }
 
     private writeSymbol(executionResult: ExecutionResult): void {;
         this.tape.writeSymbol(executionResult.symbol);
-        this.tapeSubject.next(new Event(EventType.SYMBOL_WRITE, {
+        this.tapeSubject.next(new Event(EventType.SYMBOL_WRITE, 'write', {
             state: this.stateManager.currentState,
             tape: this.tape
         }));
@@ -113,7 +113,7 @@ export default class TuringMachine {
 
     private move(executionResult: ExecutionResult): void {
         this.tape.move(executionResult.direction);
-        this.tapeSubject.next(new Event(EventType.TAPE_MOVE, {
+        this.tapeSubject.next(new Event(EventType.TAPE_MOVE, 'move', {
             state: this.stateManager.currentState,
             tape: this.tape
         }));
@@ -121,7 +121,7 @@ export default class TuringMachine {
 
     private handleFinishIfNecessary(): void {
         if (this.lastExecutionResult.finished) {
-            this.tapeSubject.next(new Event(EventType.FINISHED));
+            this.tapeSubject.next(new Event(EventType.FINISHED, 'finished'));
             this.subscription.unsubscribe();
         }
     }
@@ -135,7 +135,7 @@ export default class TuringMachine {
 
     private handleError(error: Error): void {
         this.subscription.unsubscribe();
-        this.tapeSubject.next(new Event(EventType.ERROR, { message: error.message }));
+        this.tapeSubject.next(new Event(EventType.ERROR, 'error', { message: error.message }));
     }
 
 }

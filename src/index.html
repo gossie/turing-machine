@@ -25,7 +25,8 @@
                         navbarExpanded: false,
                         errorMessage: '',
                         paused: false,
-                        pauseButtonLabel: 'Pause'
+                        pauseButtonLabel: 'Pause',
+                        currentState: ''
                     },
                     methods: {
                         addInstruction: function() {
@@ -53,6 +54,7 @@
 
                             this.subscription = turingMachine.observeState()
                                 .subscribe(event => {
+                                    this.currentState = event.message;
                                     if (event.type === 2) {
                                         this.selectedStateIndex = this.states.indexOf(event.payload.state);
                                     } else if (event.type === 4) {
@@ -319,6 +321,9 @@
                                     <div class="control">
                                         <a id="step-button" class="button" v-if="paused" @click="step">Step</a>
                                         <a id="step-button" class="button" v-else disabled>Step</a>
+                                    </div>
+                                    <div class="control">
+                                        {{ currentState }}
                                     </div>
                                 </div>
                             </div>

@@ -40,7 +40,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('a');
 
@@ -72,7 +72,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('b');
 
@@ -109,7 +109,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('ab');
 
@@ -157,7 +157,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('ab');
 
@@ -190,7 +190,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('ab');
 
@@ -236,7 +236,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('ab');
 
@@ -264,7 +264,7 @@ describe('Turing Machine', () => {
             ];
 
             const tape = new Tape();
-            const turingMachine = new TuringMachine(tape, new StateManager(), 10);
+            const turingMachine = new TuringMachine(tape, new StateManager(), 1);
             turingMachine.loadProgram(states);
             turingMachine.loadWord('ab');
 
